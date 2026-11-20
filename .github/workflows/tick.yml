@@ -1,0 +1,34 @@
+# Wakes both apps every 30 minutes so scheduled reminders and queued emails go out even when
+# nobody has the app open (Neander scales idle apps to zero). Each app decides what is due;
+# a call with nothing due sends nothing. Secrets live in this repo's Actions secrets.
+name: Reminder scheduler
+on:
+  schedule:
+    - cron: "7,37 * * * *"
+  workflow_dispatch:
+permissions: {}
+concurrency: { group: tick, cancel-in-progress: false }
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Accord - run due jobs
+        env:
+          SECRET: ${{ secrets.ACCORD_JOB_TICK_SECRET }}
+        run: |
+          code=$(curl -sS -o body.txt -w "%{http_code}" -m 90 --retry 3 --retry-delay 20 --retry-all-errors \
+            -X POST -H "Authorization: Bearer $SECRET" -H "Content-Length: 0" \
+            https://team-esignature-wdny.apps.neander.ai/api/jobs/tick)
+          echo "Accord HTTP $code"; head -c 400 body.txt; echo
+          test "$code" = 200
+      - name: Reflect - queue reminders and send outbox
+        if: always()
+        env:
+          SECRET: ${{ secrets.REFLECT_CRON_SECRET }}
+        run: |
+          code=$(curl -sS -o body.txt -w "%{http_code}" -m 90 --retry 3 --retry-delay 20 --retry-all-errors \
+            -X POST -H "Authorization: Bearer $SECRET" -H "Content-Length: 0" \
+            https://lattice-performance-reviews-3ho4.apps.neander.ai/api/jobs)
+          echo "Reflect HTTP $code"; head -c 400 body.txt; echo
+          test "$code" = 200
