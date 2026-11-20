@@ -11,4 +11,4 @@ so automatic reminders and queued emails are sent even while the apps are idle (
 To move it to another account: copy `.github/workflows/tick.yml`, add the two secrets, and run the workflow once
 from the Actions tab (Run workflow). Every run's log shows each app's HTTP status and job summary.
 
-Schedule: every 30 minutes at :07 and :37 UTC (GitHub may delay scheduled runs by a few minutes under load).
+Schedule: every 30 minutes at :05 and :35 UTC (GitHub may delay scheduled runs by a few minutes under load).

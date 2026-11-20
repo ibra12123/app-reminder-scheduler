@@ -4,7 +4,7 @@
 name: Reminder scheduler
 on:
   schedule:
-    - cron: "7,37 * * * *"
+    - cron: "5,35 * * * *"
   workflow_dispatch:
 permissions: {}
 concurrency: { group: tick, cancel-in-progress: false }
